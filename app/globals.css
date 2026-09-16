@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f6fb;
+  --foreground: #101828;
+
+  /* Brand tokens, taken from the client's reference screenshots */
+  --navy-950: #0b1530;
+  --navy-900: #0f1b3d;
+  --navy-800: #16224b;
+  --navy-700: #223163;
+  --accent-green: #16a34a;
+  --accent-green-dark: #15803d;
+  --surface: #ffffff;
+  --surface-muted: #eef1f8;
+  --border-subtle: #e2e6f0;
+  --text-muted: #64748b;
+  --danger: #dc2626;
+  --warning: #d97706;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-accent-green: var(--accent-green);
+  --color-accent-green-dark: var(--accent-green-dark);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-muted: var(--text-muted);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
