@@ -193,21 +193,101 @@ function extractHistoricalPurchases() {
   return purchases;
 }
 
+// ---------------- 6. LEDGER ENTRIES (Cash & Bank / "Money" import) ----------------
+// Source: "2) Cashbook" (mixes Cash and Mobile Money — split by the "Form
+// of payment/inflow" column) and "3) Bankbook" (entirely the Bank ledger)
+// in the FULL_REPORT workbook. This is what feeds the app's Cash & Bank
+// page and Balance Sheet report.
+function extractLedgerEntries() {
+  const wb = XLSX.readFile(fullReportPath, { cellDates: true });
+  const entries = [];
+
+  // --- Cashbook: columns are
+  // [0 blank, 1 Date, 2 Description, 3 Form of payment/inflow, 4 Generic Account,
+  //  5 Account type, 6 Purchase-stock item, 7 Sales-stock item, 8 Proof document,
+  //  9 Numbering, 10 In(+), 11 Out(-), 12 Cumulative Balance]
+  const cashRows = sheetToRows(wb, "2) Cashbook");
+  for (const row of cashRows) {
+    const date = row[1];
+    if (!(date instanceof Date)) continue; // skips blank rows and the sheet's repeated header rows
+    const description = String(row[2] ?? "").trim();
+    const form = String(row[3] ?? "").trim().toLowerCase();
+    const purchaseItem = row[6];
+    const salesItem = row[7];
+    const amountIn = Number(row[10]) || 0;
+    const amountOut = Number(row[11]) || 0;
+    if (amountIn === 0 && amountOut === 0) continue;
+
+    const ledger = form.includes("momo") ? "Mobile Money" : "Cash";
+    let type = "Adjustment";
+    if (salesItem) type = "Sale";
+    else if (purchaseItem) type = "Purchase";
+    else if (amountOut > 0) type = "Expense";
+
+    entries.push({
+      ledger,
+      date: toISODate(date),
+      description,
+      type,
+      amountIn,
+      amountOut,
+    });
+  }
+
+  // --- Bankbook: columns are
+  // [0 blank, 1 Date, 2 Description, 3 Form of payment/inflow, 4 Generic Account,
+  //  5 Purchase-stock item, 6 Sales-stock item, 7 Proof document, 8 Numbering,
+  //  9 Deposits(+), 10 In(+) [unused — a duplicated header artefact], 11 Out(-)]
+  const bankRows = sheetToRows(wb, "3) Bankbook");
+  for (const row of bankRows) {
+    const date = row[1];
+    if (!(date instanceof Date)) continue;
+    const description = String(row[2] ?? "").trim();
+    const purchaseItem = row[5];
+    const salesItem = row[6];
+    const amountIn = Number(row[9]) || 0;
+    const amountOut = Number(row[11]) || 0;
+    if (amountIn === 0 && amountOut === 0) continue;
+
+    const lower = description.toLowerCase();
+    let type = "Adjustment";
+    if (lower.includes("deposit")) type = "Deposit";
+    else if (lower.includes("withdraw")) type = "Withdrawal";
+    else if (purchaseItem) type = "Purchase";
+    else if (salesItem) type = "Sale";
+
+    entries.push({
+      ledger: "Bank",
+      date: toISODate(date),
+      description,
+      type,
+      amountIn,
+      amountOut,
+    });
+  }
+
+  return entries;
+}
+
+
 const products = extractProducts();
 const suppliers = extractSuppliers();
 const customers = extractCustomers();
 const historicalSales = extractHistoricalSales();
 const historicalPurchases = extractHistoricalPurchases();
+const ledgerEntries = extractLedgerEntries();
 
 fs.writeFileSync(path.join(outDir, "products.csv"), toCSV(products));
 fs.writeFileSync(path.join(outDir, "suppliers.csv"), toCSV(suppliers));
 fs.writeFileSync(path.join(outDir, "customers.csv"), toCSV(customers));
 fs.writeFileSync(path.join(outDir, "historical-sales.csv"), toCSV(historicalSales));
 fs.writeFileSync(path.join(outDir, "historical-purchases.csv"), toCSV(historicalPurchases));
+fs.writeFileSync(path.join(outDir, "ledger-entries.csv"), toCSV(ledgerEntries));
 
 console.log(`Products:              ${products.length} rows`);
 console.log(`Suppliers:             ${suppliers.length} rows`);
 console.log(`Customers:             ${customers.length} rows`);
 console.log(`Historical sales:      ${historicalSales.length} rows`);
 console.log(`Historical purchases:  ${historicalPurchases.length} rows`);
+console.log(`Ledger entries:        ${ledgerEntries.length} rows`);
 console.log(`\nWritten to ${outDir}/`);

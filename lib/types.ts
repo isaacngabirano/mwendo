@@ -173,6 +173,7 @@ export type SyncEventType =
   | "product-upsert"
   | "customer-upsert"
   | "supplier-upsert"
+  | "category-upsert"
   | "ledger-entry";
 
 export interface SyncEvent {

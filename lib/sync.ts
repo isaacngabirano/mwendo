@@ -115,6 +115,15 @@ async function pushOne(event: SyncEvent): Promise<boolean> {
         if (error) throw error;
         return true;
       }
+      case "category-upsert": {
+        const c = event.payload as Category;
+        const { error } = await supabase.from("categories").upsert({
+          id: c.uuid,
+          name: c.name,
+        });
+        if (error) throw error;
+        return true;
+      }
       case "supplier-upsert": {
         const s = event.payload as Supplier;
         const { error } = await supabase.from("suppliers").upsert({

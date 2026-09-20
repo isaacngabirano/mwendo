@@ -6,6 +6,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { db, uuid, nowISO, queueSyncEvent } from "@/lib/db";
 import { pushQueuedChanges } from "@/lib/sync";
 import { Card, Button, Modal, Field, inputClass, EmptyState } from "@/components/ui";
+import { CategorySelect } from "@/components/CategorySelect";
 import type { Supplier } from "@/lib/types";
 
 function empty(): Omit<Supplier, "id"> {
@@ -23,7 +24,6 @@ function empty(): Omit<Supplier, "id"> {
 
 export default function SuppliersPage() {
   const suppliers = useLiveQuery(() => db.suppliers.toArray(), []);
-  const categories = useLiveQuery(() => db.categories.toArray(), []);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Omit<Supplier, "id"> | null>(null);
 
@@ -110,19 +110,11 @@ export default function SuppliersPage() {
               <input className={inputClass} value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} />
             </Field>
             <Field label="Category">
-              <select
-                className={inputClass}
+              <CategorySelect
                 value={editing.category}
-                onChange={(e) => setEditing({ ...editing, category: e.target.value })}
-              >
-                <option value="">Select…</option>
-                {categories?.map((c) => (
-                  <option key={c.uuid} value={c.name}>
-                    {c.name}
-                  </option>
-                ))}
-                <option value="Other">Other</option>
-              </select>
+                onChange={(name) => setEditing({ ...editing, category: name })}
+                includeOther
+              />
             </Field>
             <Field label="Products supplied">
               <input

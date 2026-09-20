@@ -13,6 +13,7 @@ import {
   BarChart3,
   Settings,
   Wallet,
+  Tag,
   X,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/sales", label: "Sales / Till", icon: ShoppingCart },
   { href: "/products", label: "Products", icon: Package },
+  { href: "/categories", label: "Categories", icon: Tag },
   { href: "/customers", label: "Customers", icon: Users },
   { href: "/suppliers", label: "Suppliers", icon: Truck },
   { href: "/purchases", label: "Purchases", icon: ClipboardList },

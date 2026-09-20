@@ -9,6 +9,7 @@ import { pushQueuedChanges } from "@/lib/sync";
 import { formatUGX } from "@/lib/format";
 import { unitForCategory, unitLabel, defaultReorderThreshold, generateSKU } from "@/lib/categoryDefaults";
 import { Card, Button, Badge, Modal, Field, inputClass, EmptyState } from "@/components/ui";
+import { CategorySelect } from "@/components/CategorySelect";
 import type { Product, SellUnit } from "@/lib/types";
 
 function blankSellUnit(baseUnit: string): SellUnit {
@@ -37,7 +38,6 @@ function emptyProduct(): Omit<Product, "id"> {
 
 export default function ProductsPage() {
   const products = useLiveQuery(() => db.products.toArray(), []);
-  const categories = useLiveQuery(() => db.categories.toArray(), []);
   const suppliers = useLiveQuery(() => db.suppliers.toArray(), []);
 
   const [search, setSearch] = useState("");
@@ -280,18 +280,7 @@ export default function ProductsPage() {
                 />
               </Field>
               <Field label="Category">
-                <select
-                  className={inputClass}
-                  value={editing.category}
-                  onChange={(e) => onCategoryChange(e.target.value)}
-                >
-                  <option value="">Select…</option>
-                  {categories?.map((c) => (
-                    <option key={c.uuid} value={c.name}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <CategorySelect value={editing.category} onChange={onCategoryChange} />
               </Field>
               <Field label="Supplier">
                 <select
